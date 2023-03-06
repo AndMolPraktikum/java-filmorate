@@ -14,7 +14,7 @@
 	<name>filmorate</name>
 	<description>&amp;quot;What to watch tonight&amp;quot; project</description>
 	<properties>
-		<java.version>19</java.version>
+		<java.version>11</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
