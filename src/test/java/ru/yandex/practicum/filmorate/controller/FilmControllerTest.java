@@ -162,8 +162,4 @@ class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
     }
-
-
-
-
 }
