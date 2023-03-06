@@ -12,9 +12,9 @@
 	<artifactId>filmorate</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>filmorate</name>
-	<description>&quot;What to watch tonight&quot; project</description>
+	<description>&amp;quot;What to watch tonight&amp;quot; project</description>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>19</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -46,6 +46,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.0.4</version>
 			</plugin>
 		</plugins>
 	</build>
