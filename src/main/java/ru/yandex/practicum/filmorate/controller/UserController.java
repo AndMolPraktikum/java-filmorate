@@ -20,47 +20,45 @@ public class UserController {
 
     @GetMapping
     public Collection<User> findAll() {
+        log.info("Входящий запрос GET. Исходящий ответ: {}", users.values());
         return users.values();
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) throws UserValidationException {
-        user = isValid(user);
+    public User create(@Valid @RequestBody User user) {
+        isValid(user);
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         id++;
         user.setId(id);
         users.put(id, user);
-        log.info("Объект для сохранения User: {}", user);
+        log.info("Входящий запрос POST: {}. Исходящий ответ: {}", user, users.get(id));
         return user;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) throws UserValidationException {
+        isValid(user);
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         Integer key = user.getId();
         if (users.containsKey(key)) {
-            users.get(key).setEmail(user.getEmail());
-            users.get(key).setLogin(user.getLogin());
-            users.get(key).setName(user.getName());
-            users.get(key).setBirthday(user.getBirthday());
-            log.info("Объект для обновления User: {}", user);
+            users.put(key, user);
+            log.info("Входящий запрос PUT: {}. Исходящий ответ: {}", user, users.get(id));
             return users.get(key);
         } else {
+            log.error("Пользователь с таким ID не существует: {}", user.getId());
             throw new UserValidationException("Пользователь с таким ID не существует");
         }
     }
 
-    private User isValid(User user) throws UserValidationException {
-        if (users.containsKey(user.getId())) {
-            log.info("Пользователь с таким ID уже существует: {}", user.getId());
-            throw new UserValidationException("Пользователь с таким ID уже существует");
-        }
+    private void isValid(User user) throws UserValidationException {
         if (user.getLogin().contains(" ")) {
-            log.info("Логин содержит пробел: {}", user.getLogin());
+            log.error("Логин содержит пробел: {}", user.getLogin());
             throw new UserValidationException("Логин содержит пробел");
         }
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        return user;
     }
 }
 

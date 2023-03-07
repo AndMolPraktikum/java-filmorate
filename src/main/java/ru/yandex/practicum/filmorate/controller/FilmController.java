@@ -22,41 +22,37 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
+        log.info("Входящий запрос GET. Исходящий ответ: {}", films.values());
         return films.values();
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) throws FilmValidationException {
+    public Film create(@Valid @RequestBody Film film) {
         isValid(film);
         id++;
         film.setId(id);
         films.put(id, film);
-        log.info("Объект для сохранения Film: {}", film);
+        log.info("Входящий запрос POST: {}. Исходящий ответ: {}", film, films.get(id));
         return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws FilmValidationException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new FilmValidationException("В то время фильмы не снимались");
-        }
+        isValid(film);
         Integer key = film.getId();
         if (films.containsKey(key)) {
             films.put(key, film);
-            log.info("Объект для обновления Film: {}", film);
+            log.info("Входящий запрос PUT: {}. Исходящий ответ: {}", film, films.get(id));
             return films.get(key);
         } else {
+            log.error("Фильм с таким ID не существует: {}", film.getId());
             throw new FilmValidationException("Фильм с таким ID не существует");
         }
     }
 
     private void isValid(Film film) throws FilmValidationException {
-        if (films.containsKey(film.getId())) {
-            log.warn("Фильм с таким ID уже существует: {}", film.getId());
-            throw new FilmValidationException("Фильм с таким ID уже существует");
-        }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Дата релиза раньше дня рождения кино: {}", film.getReleaseDate());
+            log.error("Дата релиза раньше дня рождения кино: {}", film.getReleaseDate());
             throw new FilmValidationException("В то время фильмы не снимались");
         }
     }

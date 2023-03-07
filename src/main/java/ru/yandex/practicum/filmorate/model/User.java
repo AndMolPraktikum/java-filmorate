@@ -18,7 +18,6 @@ public class User {
     @NonNull
     @Email(message = "Некорректный адрес электронной почты") // не работает сообщение
     private String email;
-    @NonNull
     @NotBlank
     private String login;
     private String name;
