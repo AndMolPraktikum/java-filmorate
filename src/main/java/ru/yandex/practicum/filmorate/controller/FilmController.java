@@ -22,27 +22,29 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Входящий запрос GET. Исходящий ответ: {}", films.values());
+        log.info("Входящий запрос GET /films. Исходящий ответ: {}", films.values());
         return films.values();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         isValid(film);
+        log.info("Входящий запрос POST: {}", film);
         id++;
         film.setId(id);
         films.put(id, film);
-        log.info("Входящий запрос POST: {}. Исходящий ответ: {}", film, films.get(id));
+        log.info("Исходящий ответ: {}", film);
         return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws FilmValidationException {
         isValid(film);
+        log.info("Входящий запрос PUT: {}", film);
         Integer key = film.getId();
         if (films.containsKey(key)) {
             films.put(key, film);
-            log.info("Входящий запрос PUT: {}. Исходящий ответ: {}", film, films.get(id));
+            log.info("Исходящий ответ: {}", film);
             return films.get(key);
         } else {
             log.error("Фильм с таким ID не существует: {}", film.getId());

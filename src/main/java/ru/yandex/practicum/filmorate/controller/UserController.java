@@ -20,31 +20,33 @@ public class UserController {
 
     @GetMapping
     public Collection<User> findAll() {
-        log.info("Входящий запрос GET. Исходящий ответ: {}", users.values());
+        log.info("Входящий запрос GET /users. Исходящий ответ: {}", users.values());
         return users.values();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
+        log.info("Входящий запрос POST: {}", user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
         id++;
         user.setId(id);
         users.put(id, user);
-        log.info("Входящий запрос POST: {}. Исходящий ответ: {}", user, users.get(id));
+        log.info("Исходящий ответ: {}", user);
         return user;
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) throws UserValidationException {
+        log.info("Входящий запрос PUT: {}", user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
         Integer key = user.getId();
         if (users.containsKey(key)) {
             users.put(key, user);
-            log.info("Входящий запрос PUT: {}. Исходящий ответ: {}", user, users.get(id));
+            log.info("Исходящий ответ: {}", user);
             return users.get(key);
         } else {
             log.error("Пользователь с таким ID не существует: {}", user.getId());
