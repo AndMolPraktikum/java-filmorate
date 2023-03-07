@@ -26,7 +26,6 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        isValid(user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
@@ -39,7 +38,6 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User user) throws UserValidationException {
-        isValid(user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
@@ -51,13 +49,6 @@ public class UserController {
         } else {
             log.error("Пользователь с таким ID не существует: {}", user.getId());
             throw new UserValidationException("Пользователь с таким ID не существует");
-        }
-    }
-
-    private void isValid(User user) throws UserValidationException {
-        if (user.getLogin().contains(" ")) {
-            log.error("Логин содержит пробел: {}", user.getLogin());
-            throw new UserValidationException("Логин содержит пробел");
         }
     }
 }
