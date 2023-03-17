@@ -62,7 +62,7 @@
 		<module name="ModifierOrder"/>
 		<module name="EmptyLineSeparator">
 			<property name="tokens"
-					  value="IMPORT,CLASS_DEF,ENUM_DEF,longERFACE_DEF,CTOR_DEF,METHOD_DEF,STATIC_INIT,INSTANCE_INIT,VARIABLE_DEF"/>
+					  value="IMPORT,CLASS_DEF,ENUM_DEF,INTERFACE_DEF,CTOR_DEF,METHOD_DEF,STATIC_INIT,INSTANCE_INIT,VARIABLE_DEF"/>
 			<property name="allowNoEmptyLineBetweenFields" value="true"/>
 		</module>
 		<module name="SeparatorWrap">
@@ -122,9 +122,9 @@
 			<property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
 			<message key="name.invalidPattern" value="Method type name ''{0}'' must match pattern ''{1}''."/>
 		</module>
-		<module name="longerfaceTypeParameterName">
+		<module name="InterfaceTypeParameterName">
 			<property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$|[ID]$)"/>
-			<message key="name.invalidPattern" value="longerface type name ''{0}'' must match pattern ''{1}''."/>
+			<message key="name.invalidPattern" value="Interface type name ''{0}'' must match pattern ''{1}''."/>
 		</module>
 		<module name="NoFinalizer">
 			<property name="severity" value="ignore"/>
@@ -182,7 +182,7 @@
 		</module>
 		<module name="AnnotationLocation">
 			<property name="id" value="AnnotationLocationMostCases"/>
-			<property name="tokens" value="CLASS_DEF, longERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF"/>
+			<property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF"/>
 		</module>
 		<module name="AnnotationLocation">
 			<property name="id" value="AnnotationLocationVariables"/>
