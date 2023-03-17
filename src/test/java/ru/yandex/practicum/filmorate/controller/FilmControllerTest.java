@@ -15,6 +15,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
@@ -193,14 +194,16 @@ class FilmControllerTest {
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.rate").value("1"))
                 .andExpect(content().string(containsString("\"whoLiked\":[1]")));
+
+
     }
 
     @Test
     void shouldReturnStatus404() throws Exception {
         final User friend = User.builder()
-                .login("friend")
+                .login("friend2")
                 .name("")
-                .email("friendmail@yandex.ru")
+                .email("friendmail2@yandex.ru")
                 .birthday(LocalDate.of(2000, 9, 23))
                 .build();
 

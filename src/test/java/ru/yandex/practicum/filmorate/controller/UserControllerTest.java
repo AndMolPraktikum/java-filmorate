@@ -154,6 +154,7 @@ class UserControllerTest {
     public void shouldReturnAssignedName() throws Exception {
         final User correctUser2 = correctUser.toBuilder()
                 .name(null)
+                .email("dolore@yandex.ru")
                 .build();
 
         mockMvc.perform(post("/users")
