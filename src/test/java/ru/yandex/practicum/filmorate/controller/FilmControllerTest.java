@@ -6,15 +6,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = FilmController.class)
+@WebMvcTest
+@ComponentScan(value = {"ru.yandex.practicum.filmorate"})
 class FilmControllerTest {
 
     @Autowired
@@ -30,14 +34,14 @@ class FilmControllerTest {
         correctFilm = Film.builder()
                 .name("Correct Movie")
                 .description("A wonderful film about the life of programmers")
-                .releaseDate(LocalDate.of(2023,1,1))
+                .releaseDate(LocalDate.of(2023, 1, 1))
                 .duration(100)
                 .build();
 
         incorrectFilm = Film.builder()
                 .name("")
                 .description("Description")
-                .releaseDate(LocalDate.of(1900,3,25))
+                .releaseDate(LocalDate.of(1900, 3, 25))
                 .duration(200)
                 .build();
     }
@@ -84,7 +88,7 @@ class FilmControllerTest {
     @Test
     void shouldBeReturnStatus500WhenIncorrectReleaseDate() throws Exception {
         Film incorrectFilm3 = correctFilm.toBuilder()
-                .releaseDate(LocalDate.of(1890, 2,25))
+                .releaseDate(LocalDate.of(1890, 2, 25))
                 .build();
 
         mockMvc.perform(post("/films")
@@ -160,5 +164,60 @@ class FilmControllerTest {
         mockMvc.perform(get("/films"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
+    }
+
+    @Test
+    void shouldReturnRate1() throws Exception {
+        final User friend = User.builder()
+                .login("friend")
+                .name("")
+                .email("friendmail@yandex.ru")
+                .birthday(LocalDate.of(2000, 9, 23))
+                .build();
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(friend))
+                        .contentType("application/json"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/films")
+                        .content(objectMapper.writeValueAsString(correctFilm))
+                        .contentType("application/json"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/films/1/like/1"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/films/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.rate").value("1"))
+                .andExpect(content().string(containsString("\"whoLiked\":[1]")));
+    }
+
+    @Test
+    void shouldReturnStatus404() throws Exception {
+        final User friend = User.builder()
+                .login("friend")
+                .name("")
+                .email("friendmail@yandex.ru")
+                .birthday(LocalDate.of(2000, 9, 23))
+                .build();
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(friend))
+                        .contentType("application/json"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/films")
+                        .content(objectMapper.writeValueAsString(correctFilm))
+                        .contentType("application/json"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(delete("/films/1/like/1"))
+                .andExpect(content().contentType("application/json"))
+                .andExpect(status().isNotFound());
+        //.andExpect(content().string(containsString("Пользователь с ID 1 не отмечал этот фильм")));
+        // найти решение для кодировки в русские символы ÐÐ¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»Ñ Ñ ID 1 Ð½Ðµ Ð¾ÑÐ¼ÐµÑÐ°Ð» ÑÑÐ¾Ñ ÑÐ¸Ð»ÑÐ¼
     }
 }
