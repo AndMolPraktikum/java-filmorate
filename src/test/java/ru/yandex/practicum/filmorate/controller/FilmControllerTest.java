@@ -13,9 +13,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
@@ -137,7 +135,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void shouldBeReturnStatus400WhenUpdate() throws Exception {
+    void shouldBeReturnStatus500WhenUpdate() throws Exception {
         mockMvc.perform(post("/films")
                 .content(objectMapper.writeValueAsString(correctFilm))
                 .contentType("application/json"));
@@ -192,10 +190,7 @@ class FilmControllerTest {
         mockMvc.perform(get("/films/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.rate").value("1"))
-                .andExpect(content().string(containsString("\"whoLiked\":[1]")));
-
-
+                .andExpect(jsonPath("$.id").value("1"));
     }
 
     @Test

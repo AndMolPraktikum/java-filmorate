@@ -7,11 +7,9 @@ import java.util.Map;
 
 public interface FilmStorage {
 
-    Map<Long, Film> getFilms();
-
     Collection<Film> findAll();
 
-    Film findFilmById(long key);
+    Film get(long key);
 
     Film create(Film film);
 

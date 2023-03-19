@@ -41,7 +41,7 @@ class UserControllerTest {
         incorrectUser = User.builder()
                 .email("yandex@mail.ru")
                 .login("dolore ullamco")
-                .birthday(LocalDate.of(2466, 8, 20))
+                .birthday(LocalDate.of(2446, 8, 20))
                 .build();
     }
 
@@ -188,7 +188,6 @@ class UserControllerTest {
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(content().string(containsString("\"id\":2")))
-                .andExpect(content().string(containsString("\"friendsId\":[1]")));
+                .andExpect(content().string(containsString("\"id\":2")));
     }
 }

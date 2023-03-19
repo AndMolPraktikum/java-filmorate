@@ -26,59 +26,65 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Входящий запрос GET /films. Исходящий ответ: {}", filmService.findAll());
-        return filmService.findAll();
+        log.info("Входящий запрос GET /films.");
+        Collection<Film> allFilms = filmService.findAll();
+        log.info("Входящий запрос GET /films. Исходящий ответ: {}", allFilms);
+        return allFilms;
     }
 
     @GetMapping("/{id}")
     public Film findFilmById(@PathVariable Long id) {
-        log.info("Входящий запрос GET /films/{}. Исходящий ответ: {}", id, filmService.findFilmById(id));
-        return filmService.findFilmById(id);
+        log.info("Входящий запрос GET /films/{}.", id);
+        Film filmById = filmService.get(id);
+        log.info(" Исходящий ответ: {}", filmById);
+        return filmById;
     }
 
     //GET "/popular?count={count}" возвращает список из первых count фильмов по количеству лайков.
     // Если значение параметра count не задано, верните первые 10.
     @GetMapping("/popular")
-    public Collection<Film> findPopular(
-            @RequestParam(defaultValue = "10", required = false) Integer count) {
-        log.info("Входящий запрос GET /films/popular?count={}. Исходящий ответ: {}", count,
-                filmService.findPopular(count));
-        return filmService.findPopular(count);
+    public Collection<Film> findPopular(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        log.info("Входящий запрос GET /films/popular?count={}", count);
+        Collection<Film> popularFilms = filmService.findPopular(count);
+        log.info("Исходящий ответ: {}", popularFilms);
+        return popularFilms;
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        Film responseFilm = filmService.create(film);
-        log.info("Входящий запрос POST: {}, Исходящий ответ: {}", film, responseFilm);
-        return responseFilm;
+        log.info("Входящий запрос POST: {}", film);
+        Film createdFilm = filmService.create(film);
+        log.info("Исходящий ответ: {}", createdFilm);
+        return createdFilm;
     }
 
     //PUT "/{id}/like/{userId}"  пользователь ставит лайк фильму.
     @PutMapping("/{id}/like/{userId}")
     public void like(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.like(id, userId);
         log.info("Входящий запрос PUT /films/{}/like/{}", id, userId);
+        filmService.like(id, userId, "add");
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws FilmValidationException {
+        log.info("Входящий запрос PUT /films: {}", film);
         long key = film.getId();
-        Film responseFilm = filmService.update(key, film);
-        log.info("Входящий запрос PUT /films: {}, Исходящий ответ: {}", film, responseFilm);
-        return responseFilm;
+        Film updatedFilm = filmService.update(key, film);
+        log.info("Исходящий ответ: {}", updatedFilm);
+        return updatedFilm;
     }
 
     @DeleteMapping("/{id}")
     public void remove(@PathVariable long id) {
-        filmService.remove(id);
         log.info("Входящий запрос DELETE /films, c ID: {}", id);
+        filmService.remove(id);
     }
 
     //DELETE "/{id}/like/{userId}" пользователь удаляет лайк.
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmService.removeLike(id, userId);
         log.info("Входящий запрос DELETE /films/{}/like/{}", id, userId);
+        filmService.like(id, userId, "remove");
     }
 }
 

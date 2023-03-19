@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
-
 import lombok.Builder;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -25,5 +25,6 @@ public class Film {
     @Min(1)
     private long duration;
     private int rate;
-    private Set<Long> whoLiked;//в ТЗ не указано, но в тестах присутствует
+    @JsonIgnore
+    private Set<Long> userIds;//в ТЗ не указано, но в тестах присутствует
 }

@@ -25,8 +25,12 @@ public class UserService {
         return inMemoryUserStorage.findAll();
     }
 
-    public User findUserById(long id) {
-        return inMemoryUserStorage.findUserById(id);
+    public User get(long id) {
+        if (!inMemoryUserStorage.isContains(id)) {
+            log.error("Пользователь с ID {} не существует", id);
+            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", id));
+        }
+        return inMemoryUserStorage.get(id);
     }
 
     public User create(User user) {
@@ -35,10 +39,23 @@ public class UserService {
             throw new UserAlreadyExistException(String.format("Пользователь с " +
                     "Email: %s уже существует", user.getEmail()));
         }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
         return inMemoryUserStorage.create(user);
     }
 
     public User update(long key, User user) {
+        if (!inMemoryUserStorage.isContains(key)) {
+            log.error("Пользователя с ID {} не существует", key);
+            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", key));
+        }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+        }
+        if (user.getFriendsId() == null) {
+            user.setFriendsId(new HashSet<>());
+        }
         return inMemoryUserStorage.update(key, user);
     }
 
@@ -49,41 +66,51 @@ public class UserService {
     //добавление в друзья
     //***То есть если Лена стала другом Саши, то это значит, что Саша теперь друг Лены***
     public void addToFriends(long id, long friendId) {
-        if (!inMemoryUserStorage.getUsers().containsKey(id)) {
+        if (!inMemoryUserStorage.isContains(id)) {
             log.error("Пользователь с ID {} не существует", id);
             throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", id));
         }
-        if (!inMemoryUserStorage.getUsers().containsKey(friendId)) {
+        if (!inMemoryUserStorage.isContains(friendId)) {
             log.error("Пользователь с ID {} не существует", friendId);
             throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", friendId));
         }
-        inMemoryUserStorage.getUsers().get(id).getFriendsId().add(friendId);
-        inMemoryUserStorage.getUsers().get(friendId).getFriendsId().add(id);
+        User userId = get(id);
+        userId.getFriendsId().add(friendId);
+        update(id, userId);
+
+        User userFriendId = get(friendId);
+        userFriendId.getFriendsId().add(id);
+        update(friendId, userFriendId);
     }
 
     //удаление из друзей
     public void removeFromFriends(long id, long friendId) {
-        inMemoryUserStorage.getUsers().get(id).getFriendsId().remove(friendId);
-        inMemoryUserStorage.getUsers().get(friendId).getFriendsId().remove(id);
+        User userId = get(id);
+        userId.getFriendsId().remove(friendId);
+        update(id, userId);
+
+        User userFriendId = get(id);
+        userFriendId.getFriendsId().remove(id);
+        update(id, userFriendId);
     }
 
     //вывод списка общих друзей
     public List<User> findAllFriends(long id) {
-        Set<Long> friendsId = inMemoryUserStorage.getUsers().get(id).getFriendsId();
+        Set<Long> friendsId = get(id).getFriendsId();
         List<User> friends = new ArrayList<>();
         for (Long friendId : friendsId) {
-            friends.add(inMemoryUserStorage.getUsers().get(friendId));
+            friends.add(get(friendId));
         }
         return friends;
     }
 
     public List<User> findCommonFriends(long id, long otherId) {
-        Set<Long> friendsId = inMemoryUserStorage.getUsers().get(id).getFriendsId();
-        Set<Long> friendsOtherId = inMemoryUserStorage.getUsers().get(otherId).getFriendsId();
+        Set<Long> friendsId = get(id).getFriendsId();
+        Set<Long> friendsOtherId = get(otherId).getFriendsId();
         Set<Long> commonFriends = mutualValues(friendsId, friendsOtherId);
         List<User> friends = new ArrayList<>();
         for (Long friendId : commonFriends) {
-            friends.add(inMemoryUserStorage.getUsers().get(friendId));
+            friends.add(get(friendId));
         }
         return friends;
     }
