@@ -1,18 +1,21 @@
 package ru.yandex.practicum.filmorate.model;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
-
-import javax.validation.constraints.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
 public class Film {
 
-    private int id;
+    private long id;
     @NotBlank
     private String name;
     @Size(min = 1, max = 200)
@@ -21,5 +24,7 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
-    //private int rate;  //в ТЗ не указано, но в тестах присутствует
+    private int rate;
+    @JsonIgnore
+    private Set<Long> userIds;//в ТЗ не указано, но в тестах присутствует
 }

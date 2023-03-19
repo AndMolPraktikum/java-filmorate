@@ -2,61 +2,89 @@ package ru.yandex.practicum.filmorate.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
-    private int id = 0;
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Входящий запрос GET /films. Исходящий ответ: {}", films.values());
-        return films.values();
+        log.info("Входящий запрос GET /films.");
+        Collection<Film> allFilms = filmService.findAll();
+        log.info("Входящий запрос GET /films. Исходящий ответ: {}", allFilms);
+        return allFilms;
+    }
+
+    @GetMapping("/{id}")
+    public Film findFilmById(@PathVariable Long id) {
+        log.info("Входящий запрос GET /films/{}.", id);
+        Film filmById = filmService.get(id);
+        log.info(" Исходящий ответ: {}", filmById);
+        return filmById;
+    }
+
+    //GET "/popular?count={count}" возвращает список из первых count фильмов по количеству лайков.
+    // Если значение параметра count не задано, верните первые 10.
+    @GetMapping("/popular")
+    public Collection<Film> findPopular(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        log.info("Входящий запрос GET /films/popular?count={}", count);
+        Collection<Film> popularFilms = filmService.findPopular(count);
+        log.info("Исходящий ответ: {}", popularFilms);
+        return popularFilms;
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        isValid(film);
         log.info("Входящий запрос POST: {}", film);
-        id++;
-        film.setId(id);
-        films.put(id, film);
-        log.info("Исходящий ответ: {}", film);
-        return film;
+        Film createdFilm = filmService.create(film);
+        log.info("Исходящий ответ: {}", createdFilm);
+        return createdFilm;
+    }
+
+    //PUT "/{id}/like/{userId}"  пользователь ставит лайк фильму.
+    @PutMapping("/{id}/like/{userId}")
+    public void like(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Входящий запрос PUT /films/{}/like/{}", id, userId);
+        filmService.like(id, userId, "add");
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws FilmValidationException {
-        isValid(film);
-        log.info("Входящий запрос PUT: {}", film);
-        Integer key = film.getId();
-        if (films.containsKey(key)) {
-            films.put(key, film);
-            log.info("Исходящий ответ: {}", film);
-            return films.get(key);
-        } else {
-            log.error("Фильм с таким ID не существует: {}", film.getId());
-            throw new FilmValidationException("Фильм с таким ID не существует");
-        }
+        log.info("Входящий запрос PUT /films: {}", film);
+        long key = film.getId();
+        Film updatedFilm = filmService.update(key, film);
+        log.info("Исходящий ответ: {}", updatedFilm);
+        return updatedFilm;
     }
 
-    private void isValid(Film film) throws FilmValidationException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("Дата релиза раньше дня рождения кино: {}", film.getReleaseDate());
-            throw new FilmValidationException("В то время фильмы не снимались");
-        }
+    @DeleteMapping("/{id}")
+    public void remove(@PathVariable long id) {
+        log.info("Входящий запрос DELETE /films, c ID: {}", id);
+        filmService.remove(id);
+    }
+
+    //DELETE "/{id}/like/{userId}" пользователь удаляет лайк.
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Входящий запрос DELETE /films/{}/like/{}", id, userId);
+        filmService.like(id, userId, "remove");
     }
 }
 
