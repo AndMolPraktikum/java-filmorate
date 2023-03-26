@@ -18,72 +18,56 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Response handleThrowable(final Throwable e) {
         log.info("500 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Response handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.info("400 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Response handleUserValidationException(final UserValidationException e) {
         log.info("500 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s \n %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Response handleFilmValidationException(final FilmValidationException e) {
         log.info("500 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s \n %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Response handleFilmNotFoundException(final FilmNotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s \n %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Response handleUserNotFoundException(final UserNotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s \n %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public Response handleUserAlreadyExistException(final UserAlreadyExistException e) {
         log.info("409 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s \n %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Response handleUserNotLikedException(final UserNotLikedException e) {
         log.info("404 {}", e.getMessage(), e);
-        return new Response(
-                String.format("%s \n %s", LocalDateTime.now(), e.getMessage())
-        );
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 }
 

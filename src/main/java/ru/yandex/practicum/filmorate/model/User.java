@@ -26,5 +26,6 @@ public class User {
     @Past
     private LocalDate birthday;
     @JsonIgnore
-    private Set<Long> friendsId;
+    private Set<Long> friendsId; //Заменить на Map<Long, Status>
+
 }

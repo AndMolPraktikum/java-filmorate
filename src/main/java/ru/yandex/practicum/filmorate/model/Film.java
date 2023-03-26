@@ -26,5 +26,7 @@ public class Film {
     private long duration;
     private int rate;
     @JsonIgnore
-    private Set<Long> userIds;//в ТЗ не указано, но в тестах присутствует
+    private Set<Long> userIds;
+    //private Set<String> genres; //У фильма может быть сразу несколько жанров
+    //private String rating; //Определяет возрастное ограничение для фильма
 }
