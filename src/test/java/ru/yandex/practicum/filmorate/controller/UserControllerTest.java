@@ -6,21 +6,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserController.class)
+@ComponentScan(value = {"ru.yandex.practicum.filmorate"})
 class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+
 
     private User correctUser;
     private User incorrectUser;
@@ -37,7 +41,7 @@ class UserControllerTest {
         incorrectUser = User.builder()
                 .email("yandex@mail.ru")
                 .login("dolore ullamco")
-                .birthday(LocalDate.of(2466, 8, 20))
+                .birthday(LocalDate.of(2446, 8, 20))
                 .build();
     }
 
@@ -116,7 +120,7 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldBeReturnStatus400WhenUpdate() throws Exception {
+    void shouldBeReturnStatus404WhenUpdate() throws Exception {
         mockMvc.perform(post("/users")
                 .content(objectMapper.writeValueAsString(correctUser))
                 .contentType("application/json"));
@@ -132,7 +136,7 @@ class UserControllerTest {
         mockMvc.perform(put("/users")
                         .content(objectMapper.writeValueAsString(userIncorrectUpdate))
                         .contentType("application/json"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -150,11 +154,40 @@ class UserControllerTest {
     public void shouldReturnAssignedName() throws Exception {
         final User correctUser2 = correctUser.toBuilder()
                 .name(null)
+                .email("dolore@yandex.ru")
                 .build();
 
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(correctUser2))
                         .contentType("application/json"))
                 .andExpect(jsonPath("$.name").value("dolore"));
+    }
+
+    @Test
+    public void shouldReturnFriend1() throws Exception {
+        final User friend = User.builder()
+                .login("friend")
+                .name("")
+                .email("friendmail@yandex.ru")
+                .birthday(LocalDate.of(2000, 9, 23))
+                .build();
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(correctUser))
+                        .contentType("application/json"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(friend))
+                        .contentType("application/json"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/users/1/friends"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().string(containsString("\"id\":2")));
     }
 }
