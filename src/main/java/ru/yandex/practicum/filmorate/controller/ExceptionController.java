@@ -72,14 +72,14 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Response handleMpaNotFoundException (final MpaNotFoundException e) {
+    public Response handleMpaNotFoundException(final MpaNotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
         return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Response handleGenreNotFoundException (final GenreNotFoundException e) {
+    public Response handleGenreNotFoundException(final GenreNotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
         return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
