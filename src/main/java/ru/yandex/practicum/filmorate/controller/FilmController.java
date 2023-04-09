@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,7 @@ public class FilmController {
     public Collection<Film> findAll() {
         log.info("Входящий запрос GET /films.");
         Collection<Film> allFilms = filmService.findAll();
-        log.info("Входящий запрос GET /films. Исходящий ответ: {}", allFilms);
+        log.info("Исходящий ответ: {}", allFilms);
         return allFilms;
     }
 

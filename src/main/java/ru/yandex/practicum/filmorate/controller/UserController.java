@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -16,23 +15,22 @@ import java.util.Collection;
 @RequestMapping("/users")
 public class UserController {
 
-
     private final UserService userService;
 
     @Autowired
-    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping()
-    public Collection<User> findAll() {
+    public Collection<User> findAll() {  // TODO it's work
         log.info("Входящий запрос GET /users.");
         Collection<User> allUsers = userService.findAll();
         log.info("Исходящий ответ: {}", allUsers);
         return allUsers;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}")  // TODO it's work
     public User findUserById(@PathVariable Long id) {
         log.info("Входящий запрос GET /users/{}.", id);
         User userById = userService.get(id);
@@ -40,7 +38,7 @@ public class UserController {
         return userById;
     }
 
-    @GetMapping("/{id}/friends")
+    @GetMapping("/{id}/friends")  // TODO it's work
     public Collection<User> findAllFriends(@PathVariable Long id) {
         log.info("Входящий запрос GET /users/{}/friends.", id);
         Collection<User> allFriends = userService.findAllFriends(id);
@@ -48,7 +46,7 @@ public class UserController {
         return allFriends;
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}")
+    @GetMapping("/{id}/friends/common/{otherId}") // TODO it's work
     public Collection<User> findCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         log.info("Входящий запрос GET /users/{}/friends/common/{}.", id, otherId);
         Collection<User> commonFriends = userService.findCommonFriends(id, otherId);
@@ -56,7 +54,7 @@ public class UserController {
         return commonFriends;
     }
 
-    @PostMapping
+    @PostMapping  // TODO it's work
     public User create(@Valid @RequestBody User user) {
         log.info("Входящий запрос POST /users: {}", user);
         User createdUser = userService.create(user);
@@ -64,7 +62,7 @@ public class UserController {
         return createdUser;
     }
 
-    @PutMapping
+    @PutMapping  // TODO it's work
     public User update(@Valid @RequestBody User user) throws UserValidationException {
         log.info("Входящий запрос PUT /users: {}", user);
         long key = user.getId();
@@ -73,19 +71,19 @@ public class UserController {
         return updatedUser;
     }
 
-    @PutMapping("{id}/friends/{friendId}")
+    @PutMapping("{id}/friends/{friendId}") // TODO it's work
     public void addToFriends(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Входящий запрос PUT /users/{}/friends/{}", id, friendId);
         userService.addToFriends(id, friendId);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") // TODO it's work
     public void remove(@PathVariable Long id) {
         log.info("Входящий запрос DELETE /users, c ID: {}", id);
         userService.remove(id);
     }
 
-    @DeleteMapping("{id}/friends/{friendId}")
+    @DeleteMapping("{id}/friends/{friendId}") // TODO it's work
     public void removeFromFriends(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Входящий запрос DELETE /users/{}/friends/{}", id, friendId);
         userService.removeFromFriends(id, friendId);
