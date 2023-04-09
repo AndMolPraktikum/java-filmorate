@@ -10,7 +10,9 @@ import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.enums.Status.CONFIRMED;
@@ -113,7 +115,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-   public List<User> findCommonFriends(long id, long otherId) {  //TODO it's work
+    public List<User> findCommonFriends(long id, long otherId) {  //TODO it's work
 //        Set<Long> friendsId = get(id).getFriends();
 //        Set<Long> friendsOtherId = get(otherId).getFriends();
 //        Set<Long> commonFriends = mutualValues(friendsId, friendsOtherId);

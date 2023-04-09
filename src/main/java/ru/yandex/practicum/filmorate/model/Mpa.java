@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-
 @Data
 @Builder(toBuilder = true)
 public class Mpa {

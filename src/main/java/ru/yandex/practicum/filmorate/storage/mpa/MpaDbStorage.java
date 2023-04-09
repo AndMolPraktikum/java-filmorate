@@ -30,7 +30,7 @@ public class MpaDbStorage implements MpaStorage {
         String sql = "SELECT * FROM mpas";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs)).stream()
-                .sorted((m1,m2) -> Integer.compare(m1.getId(), m2.getId()))
+                .sorted((m1, m2) -> Integer.compare(m1.getId(), m2.getId()))
                 .collect(Collectors.toList());
     }
 

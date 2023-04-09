@@ -7,17 +7,16 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.enums.Status;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.*;
-import java.sql.Date;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -143,7 +142,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film.getGenres() != null) {
             String createFilmGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
-            for (Genre genre : film.getGenres()){
+            for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update(createFilmGenreSql, new Object[]{key, genre.getId()});
             }
         }
