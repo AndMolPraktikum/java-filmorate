@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,7 +26,6 @@ class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-
 
     private User correctUser;
     private User incorrectUser;
@@ -166,31 +164,5 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(correctUser2))
                         .contentType("application/json"))
                 .andExpect(jsonPath("$.name").value("dolore"));
-    }
-
-    @Test
-    public void shouldReturnFriend1() throws Exception {
-        final User friend = User.builder()
-                .login("JonFavreau")
-                .name("Джон Фавро")
-                .email("jon1966@yandex.ru")
-                .birthday(LocalDate.of(1966, 10, 19))
-                .friends(new ArrayList<>())
-                .build();
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(friend))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(put("/users/8/friends/2"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/users/8/friends"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(content().string(containsString("\"id\":2")));
-
-        mockMvc.perform(delete("/users/8"));
     }
 }

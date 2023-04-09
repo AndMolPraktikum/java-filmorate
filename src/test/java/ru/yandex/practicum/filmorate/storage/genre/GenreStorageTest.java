@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.storage.genre;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -16,13 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class GenreServiceTest {
+class GenreStorageTest {
 
-    private final GenreDbStorage genreDbStorage;
+    private final GenreDbStorage GenreDbStorage;
 
     @Test
     void findAll() {
-        Collection<Genre> allGenres = genreDbStorage.findAll();
+        Collection<Genre> allGenres = GenreDbStorage.findAll();
 
         assertThat(allGenres)
                 .isNotEmpty()
@@ -30,13 +29,12 @@ class GenreServiceTest {
                 .doesNotContainNull()
                 .extracting("name")
                 .contains("Боевик", "Документальный", "Драма", "Комедия", "Мультфильм", "Триллер")
-                ;
-
+                .doesNotContain("Семейный");
     }
 
     @Test
     void get() {
-        Optional<Genre> genreOptional = genreDbStorage.get(2);
+        Optional<Genre> genreOptional = GenreDbStorage.get(2);
 
         assertThat(genreOptional)
                 .isPresent()

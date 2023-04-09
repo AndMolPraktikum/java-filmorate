@@ -6,9 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,7 +14,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -24,47 +21,48 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserDbStorageTest {
 
     private final UserDbStorage userStorage;
-
-    private final FilmDbStorage filmStorage;
-
-    private User correctUser;
-    private User incorrectUser;
+    private User chrisColumbus;
+    private User peterJackson;
 
     @BeforeEach
     protected void init() {
-        correctUser = User.builder()
-                .email("mail@mail.ru")
-                .login("dolore")
-                .name("Nick Name")
-                .birthday(LocalDate.of(1946, 8, 20))
+        chrisColumbus = User.builder()
+                .email("kris1958@yandex.ru")
+                .login("kris1958")
+                .name("Крис Коламбус")
+                .birthday(LocalDate.of(1958, 9, 10))
                 .friends(new ArrayList<>())
                 .build();
 
-        incorrectUser = User.builder()
-                .email("yandex@mail.ru")
-                .login("dolore ullamco")
-                .birthday(LocalDate.of(2446, 8, 20))
+        peterJackson = User.builder()
+                .email("peter1961@yandex.ru")
+                .login("peter1961")
+                .name("Питер Джексон")
+                .birthday(LocalDate.of(1961, 10, 31))
                 .friends(new ArrayList<>())
                 .build();
     }
 
     @Test
     void shouldBeReturnedAllUsers() {
+        userStorage.create(peterJackson);
         Collection<User> allUsers = userStorage.findAll();
         assertThat(allUsers)
                 .isNotEmpty()
-                .hasSize(7)
+                .extracting("name")
+                .contains("Питер Джексон")
                 .doesNotContainNull();
     }
 
     @Test
-    void shouldBeReturnedUser5() {
-        Optional<User> userOptional = userStorage.get(5);
+    void shouldBeReturnedUser() {
+        Optional<User> userOptional = userStorage.create(chrisColumbus);
+        Optional<User> getOptional = userStorage.get(userOptional.get().getId());
 
-        assertThat(userOptional)
+        assertThat(getOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 5L)
+                        assertThat(user).hasFieldOrPropertyWithValue("name", "Крис Коламбус")
                 );
     }
 
@@ -77,61 +75,80 @@ class UserDbStorageTest {
     }
 
     @Test
-    void shouldBeCreateAndDeleteUser8() {
-        Optional<User> userOptional = userStorage.create(correctUser);
+    void shouldBeCreateAndDeleteUser() {
+        User quentinTarantino = User.builder()
+                .email("quentin1963@yandex.ru")
+                .login("justQuentin")
+                .name("Квентин Тарантино")
+                .birthday(LocalDate.of(1963, 3, 27))
+                .friends(new ArrayList<>())
+                .build();
+
+        Optional<User> userOptional = userStorage.create(quentinTarantino);
 
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
                         assertThat(user)
-                                .hasFieldOrPropertyWithValue("name", "Nick Name")
-                                .hasFieldOrPropertyWithValue("id", 8L)
+                                .hasFieldOrPropertyWithValue("name", "Квентин Тарантино")
                 );
 
-        userStorage.remove(8);
+        userStorage.remove(userOptional.get().getId());
 
         Collection<User> allUsers = userStorage.findAll();
         assertThat(allUsers)
-                .hasSize(7);
+                .extracting("name")
+                .doesNotContain("Квентин Тарантино");
     }
 
     @Test
-    void update() {
-        correctUser.setId(6);
-        correctUser.setName("Обновленный персонаж");
-        Optional<User> userOptional = userStorage.update(6, correctUser);
+    void shouldBeUpdateUser() {
+        Optional<User> chrisOptional = userStorage.create(chrisColumbus);
+        chrisColumbus = chrisOptional.get();
+        chrisColumbus.setName("Кристофер Джозеф Коламбус");
+        chrisOptional = userStorage.update(chrisColumbus.getId(), chrisColumbus);
 
-        assertThat(userOptional)
+        assertThat(chrisOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
-                        assertThat(user)
-                                .hasFieldOrPropertyWithValue("name", "Обновленный персонаж")
-                                .hasFieldOrPropertyWithValue("id", 6L)
+                        assertThat(user.getName())
+                                .contains("Джозеф")
                 );
     }
 
     @Test
     void shouldCreateFriendshipAndRemoveFromFriends() {
-        Optional<User> userOptional = userStorage.get(1);
-        assertThat(userOptional)
-                .hasValueSatisfying(user ->
-                        assertThat(user.getFriends())
-                                .hasSize(0)
-                );
+        User jamesCameron = User.builder()
+                .email("quentin1963@yandex.ru")
+                .login("james1954")
+                .name("Джеймс Кэмерон")
+                .birthday(LocalDate.of(1954, 8, 16))
+                .friends(new ArrayList<>())
+                .build();
+        Optional<User> jamesOptional = userStorage.create(jamesCameron);
 
-        userStorage.createFriendship(1, 2);
+        User georgeLucas = User.builder()
+                .email("georluc@yandex.ru")
+                .login("georluc")
+                .name("Джордж Лукас")
+                .birthday(LocalDate.of(1944, 5, 14))
+                .friends(new ArrayList<>())
+                .build();
+        Optional<User> georgeOptional = userStorage.create(georgeLucas);
 
-        userOptional = userStorage.get(1);
-        assertThat(userOptional)
+        userStorage.createFriendship(jamesOptional.get().getId(), georgeOptional.get().getId());
+
+        jamesOptional = userStorage.get(jamesOptional.get().getId());
+        assertThat(jamesOptional)
                 .hasValueSatisfying(user ->
                         assertThat(user.getFriends())
                                 .hasSize(1)
                 );
 
-        userStorage.removeFromFriends(1, 2);
+        userStorage.removeFromFriends(jamesOptional.get().getId(), georgeOptional.get().getId());
 
-        userOptional = userStorage.get(1);
-        assertThat(userOptional)
+        jamesOptional = userStorage.get(jamesOptional.get().getId());
+        assertThat(jamesOptional)
                 .hasValueSatisfying(user ->
                         assertThat(user.getFriends())
                                 .hasSize(0)

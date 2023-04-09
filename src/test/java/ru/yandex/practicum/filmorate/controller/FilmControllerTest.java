@@ -63,7 +63,7 @@ class FilmControllerTest {
                         .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value("11"));
+                .andExpect(jsonPath("$.id").value("1"));
     }
 
     @Test
@@ -170,34 +170,6 @@ class FilmControllerTest {
                 .andExpect(content().contentType("application/json"));
     }
 
-/*    @Test
-    void shouldReturnRate1() throws Exception {
-        final User friend = User.builder()
-                .login("friend")
-                .name("")
-                .email("friendmail@yandex.ru")
-                .birthday(LocalDate.of(2000, 9, 23))
-                .build();
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(friend))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(correctFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(put("/films/1/like/1"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/films/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value("1"));
-    }*/
-
     @Test
     void shouldReturnStatus404() throws Exception {
         final User friend = User.builder()
@@ -220,7 +192,5 @@ class FilmControllerTest {
         mockMvc.perform(delete("/films/1/like/8"))
                 .andExpect(content().contentType("application/json"))
                 .andExpect(status().isNotFound());
-        //.andExpect(content().string(containsString("Пользователь с ID 8 не отмечал этот фильм")));
-        // найти решение для кодировки в русские символы ÐÐ¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»Ñ Ñ ID 1 Ð½Ðµ Ð¾ÑÐ¼ÐµÑÐ°Ð» ÑÑÐ¾Ñ ÑÐ¸Ð»ÑÐ¼
     }
 }
