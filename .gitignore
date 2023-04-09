@@ -20,6 +20,7 @@ target/
 *.ipr
 *.jar
 *.DS_Store
+*.class
 
 
 ### NetBeans ###
