@@ -7,6 +7,7 @@
 *.zip
 *.tar.gz
 *.rar
+HELP.md
 hs_err_pid*
 out/
 target/
