@@ -28,7 +28,6 @@ public class Film {
     private long likes;
     @JsonIgnore
     private Set<Long> userIds;
-    //@JsonInclude(JsonInclude.Include.NON_NULL)
     private Set<Genre> genres;
     @NotNull
     private Mpa mpa;  //возрастное ограничение

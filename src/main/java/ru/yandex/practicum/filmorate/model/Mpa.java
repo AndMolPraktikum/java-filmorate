@@ -7,9 +7,8 @@ import lombok.Data;
 @Builder(toBuilder = true)
 public class Mpa {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer id;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+
     private String name;
 
     public Mpa(Integer id) {
