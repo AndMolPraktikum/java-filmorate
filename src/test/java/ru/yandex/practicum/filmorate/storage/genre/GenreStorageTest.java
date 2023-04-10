@@ -17,11 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class GenreStorageTest {
 
-    private final GenreDbStorage GenreDbStorage;
+    private final GenreDbStorage genreDbStorage;
 
     @Test
     void findAll() {
-        Collection<Genre> allGenres = GenreDbStorage.findAll();
+        Collection<Genre> allGenres = genreDbStorage.findAll();
 
         assertThat(allGenres)
                 .isNotEmpty()
@@ -34,7 +34,7 @@ class GenreStorageTest {
 
     @Test
     void get() {
-        Optional<Genre> genreOptional = GenreDbStorage.get(2);
+        Optional<Genre> genreOptional = genreDbStorage.get(2);
 
         assertThat(genreOptional)
                 .isPresent()
