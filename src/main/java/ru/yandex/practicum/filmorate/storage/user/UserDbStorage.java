@@ -92,10 +92,10 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void createFriendship(long id, long friendId) {
-        String updateUser = "INSERT INTO friends (user_id, friend_id, status_id)" +
+        String updateUser = "INSERT INTO friends (user_id, friend_id, status)" +
                 "VALUES (?, ?, ?);";
 
-        jdbcTemplate.update(updateUser, id, friendId, 2);
+        jdbcTemplate.update(updateUser, id, friendId, "Unconfirmed");
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
@@ -104,14 +104,14 @@ public class UserDbStorage implements UserStorage {
         String login = rs.getString("login");
         String email = rs.getString("email");
         LocalDate birthday = rs.getDate("birthday").toLocalDate();
-        List<Friend> friends = getSetFriends(id);
+        List<Friend> friends = getFriends(id);
         User user = new User(id, email, login, name, birthday, friends);
         return user;
     }
 
-    private List<Friend> getSetFriends(Long id) {
-        String friendsSql = "SELECT friend_id, name \n" +
-                "FROM friends f JOIN status s ON f.status_id = s.id\n" +
+    private List<Friend> getFriends(Long id) {
+        String friendsSql = "SELECT friend_id, status \n" +
+                "FROM friends " +
                 "WHERE user_id = ?;";
 
         return jdbcTemplate.query(friendsSql, (rs, rowNum) -> makeFriend(rs), id);
@@ -119,7 +119,7 @@ public class UserDbStorage implements UserStorage {
 
     private Friend makeFriend(ResultSet rs) throws SQLException {
         long id = rs.getLong("friend_id");
-        Status status = Status.valueOf(rs.getString("name").toUpperCase());
+        Status status = Status.valueOf(rs.getString("status").toUpperCase());
 
         return new Friend(id, status);
     }

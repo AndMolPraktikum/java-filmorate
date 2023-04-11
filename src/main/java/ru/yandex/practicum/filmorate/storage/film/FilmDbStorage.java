@@ -36,6 +36,7 @@ public class FilmDbStorage implements FilmStorage {
                 "       description,\n" +
                 "       release_year,\n" +
                 "       duration,\n" +
+                "       rate,\n" +
                 "       mpas_id,\n" +
                 "       mpa,\n" +
                 "       likes,\n" +
@@ -46,6 +47,7 @@ public class FilmDbStorage implements FilmStorage {
                 "            f.description AS description,\n" +
                 "            f.release_year AS release_year,\n" +
                 "            f.duration AS duration,\n" +
+                "            f.rate AS rate,\n" +
                 "            f.mpas_id AS mpas_id,\n" +
                 "            m.name AS mpa,\n" +
                 "            SUM(l.grade) AS likes\n" +
@@ -71,6 +73,7 @@ public class FilmDbStorage implements FilmStorage {
                 "       description,\n" +
                 "       release_year,\n" +
                 "       duration,\n" +
+                "       rate,\n" +
                 "       mpas_id,\n" +
                 "       mpa,\n" +
                 "       likes,\n" +
@@ -81,6 +84,7 @@ public class FilmDbStorage implements FilmStorage {
                 "            f.description AS description,\n" +
                 "            f.release_year AS release_year,\n" +
                 "            f.duration AS duration,\n" +
+                "            f.rate AS rate,\n" +
                 "            f.mpas_id AS mpas_id,\n" +
                 "            m.name AS mpa,\n" +
                 "            SUM(l.grade) AS likes\n" +
@@ -106,8 +110,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Optional<Film> create(Film film) {
-        String createFilmSql = "INSERT INTO films (name, description, release_year, duration, mpas_id)\n" +
-                "VALUES (?, ?, ?, ?, ?);";
+        String createFilmSql = "INSERT INTO films (name, description, release_year, rate, duration, mpas_id)\n" +
+                "VALUES (?, ?, ?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -115,8 +119,9 @@ public class FilmDbStorage implements FilmStorage {
             pst.setString(1, film.getName());
             pst.setString(2, film.getDescription());
             pst.setDate(3, Date.valueOf(film.getReleaseDate()));
-            pst.setLong(4, film.getDuration());
-            pst.setInt(5, film.getMpa().getId());
+            pst.setInt(4, film.getRate());
+            pst.setLong(5, film.getDuration());
+            pst.setInt(6, film.getMpa().getId());
             return pst;
         }, keyHolder);
 
@@ -135,10 +140,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Optional<Film> update(long key, Film film) {
         String updateFilmSql = "UPDATE  films SET name = ?, description = ?, release_year = ?, duration = ?, \n" +
-                "mpas_id = ? WHERE id = ?; DELETE FROM film_genres WHERE film_id = ?; ";
+                "rate = ?, mpas_id = ? WHERE id = ?; DELETE FROM film_genres WHERE film_id = ?; ";
 
         jdbcTemplate.update(updateFilmSql, new Object[]{film.getName(), film.getDescription(), film.getReleaseDate(),
-                film.getDuration(), film.getMpa().getId(), key, key});
+                film.getDuration(), film.getRate(), film.getMpa().getId(), key, key});
 
         if (film.getGenres() != null) {
             String createFilmGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
@@ -188,11 +193,12 @@ public class FilmDbStorage implements FilmStorage {
         String description = rs.getString("description");
         LocalDate releaseDate = rs.getDate("release_year").toLocalDate();
         long duration = rs.getLong("duration");
+        int rate = rs.getInt("rate");
         long likes = rs.getLong("likes");
         Set<Genre> genres = getSetGenres(id);
         Mpa mpa = new Mpa(rs.getInt("mpas_id"), rs.getString("mpa"));
 
-        return new Film(id, name, description, releaseDate, duration, likes, genres, mpa);
+        return new Film(id, name, description, releaseDate, duration, rate, likes, genres, mpa);
     }
 
     private Set<Genre> getSetGenres(long id) {

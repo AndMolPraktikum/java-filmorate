@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,8 +44,7 @@ public class FilmService {
         return filmOptional.get();
     }
 
-    //вывод 10 наиболее популярных фильмов по количеству лайков
-    public Collection<Film> findPopular(int count) {
+    public Collection<Film> findPopular(int count) { //вывод 10 наиболее популярных фильмов по количеству лайков
         return findAll().stream()
                 .sorted(this::compare)
                 .limit(count)
@@ -55,17 +53,11 @@ public class FilmService {
 
     public Film create(Film film) {
         isValid(film);
-        if (film.getUserIds() == null) {
-            film.setUserIds(new HashSet<>());
-        }
         return filmDbStorage.create(film).get();
     }
 
     public Film update(long key, Film film) throws FilmValidationException {
         isValid(film);
-        if (film.getUserIds() == null) {
-            film.setUserIds(new HashSet<>());
-        }
         Optional<Film> filmOptional = filmDbStorage.update(key, film);
         if (filmOptional.isEmpty()) {
             log.error("Фильм с таким ID не существует: {}", film.getId());

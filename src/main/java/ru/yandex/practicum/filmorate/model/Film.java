@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -26,8 +25,6 @@ public class Film {
     private long duration;
     private int rate;
     private long likes;
-    @JsonIgnore
-    private Set<Long> userIds;
     private Set<Genre> genres;
     @NotNull
     private Mpa mpa;  //возрастное ограничение
@@ -45,7 +42,7 @@ public class Film {
     }
 
     public Film(long id, String name, String description, LocalDate releaseDate, long duration, int rate, long likes,
-                Set<Long> userIds, Set<Genre> genres, Mpa mpa) {
+                Set<Genre> genres, Mpa mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -53,7 +50,6 @@ public class Film {
         this.duration = duration;
         this.rate = rate;
         this.likes = likes;
-        this.userIds = userIds;
         this.genres = genres;
         this.mpa = mpa;
     }

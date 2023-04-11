@@ -14,12 +14,12 @@ import java.util.Collection;
 @Slf4j
 @RestController
 @RequestMapping("/mpa")
-public class MPAController {
+public class MpaController {
 
     private final MpaService mpaService;
 
     @Autowired
-    public MPAController(MpaService mpaService) {
+    public MpaController(MpaService mpaService) {
         this.mpaService = mpaService;
     }
 

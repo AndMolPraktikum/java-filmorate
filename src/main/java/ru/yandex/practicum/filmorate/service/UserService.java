@@ -29,11 +29,11 @@ public class UserService {
         this.userDbStorage = userDbStorage;
     }
 
-    public Collection<User> findAll() { //TODO it's work
+    public Collection<User> findAll() {
         return userDbStorage.findAll();
     }
 
-    public User get(long id) {  //TODO it's work
+    public User get(long id) {
         Optional<User> userOptional = userDbStorage.get(id);
         if (userOptional.isEmpty()) {
             log.error("Пользователь с ID {} не существует", id);
@@ -42,7 +42,7 @@ public class UserService {
         return userOptional.get();
     }
 
-    public User create(User user) {  //TODO it's work
+    public User create(User user) {
         if (findAll().stream().anyMatch(p -> p.getEmail().equals(user.getEmail()))) {
             log.error("Пользователь с Email {} уже существует", user.getEmail());
             throw new UserAlreadyExistException(String.format("Пользователь с " +
@@ -54,7 +54,7 @@ public class UserService {
         return userDbStorage.create(user).get();
     }
 
-    public User update(long key, User user) {  //TODO it's work
+    public User update(long key, User user) {
         Optional<User> userOptional = userDbStorage.get(key);
         if (userOptional.isEmpty()) {
             log.error("Пользователя с ID {} не существует", key);
@@ -71,11 +71,7 @@ public class UserService {
         userDbStorage.remove(key);
     }
 
-    //добавление в друзья
-    //*** дружба должна стать односторонней. Это значит, что если какой-то пользователь оставил
-    // вам заявку в друзья, то он будет в списке ваших друзей, а вы в его — нет.***
-    // User id подает заявку на дружбу с User friendId, у id есть друг, а у friendId нет.
-    public void addToFriends(long id, long friendId) {  //TODO it's work
+    public void addToFriends(long id, long friendId) {
         Optional<User> userOptional = userDbStorage.get(id);
         if (userOptional.isEmpty()) {
             log.error("Пользователь с ID {} не существует", id);
@@ -89,8 +85,7 @@ public class UserService {
         userDbStorage.createFriendship(id, friendId);
     }
 
-    //удаление из друзей
-    public void removeFromFriends(long userid, long friendId) {   //TODO it's work
+    public void removeFromFriends(long userid, long friendId) {    //удаление из друзей
         Optional<Status> statusOptional = get(userid).getFriends().stream()
                 .filter(friend -> friend.getId() == friendId)
                 .map(Friend::getStatus)
@@ -107,22 +102,14 @@ public class UserService {
         }
     }
 
-    //вывод списка общих друзей
-    public List<User> findAllFriends(long id) {  //TODO it's work
+    public List<User> findAllFriends(long id) {      //вывод списка общих друзей
         return get(id).getFriends().stream()
                 .map(Friend::getId)
                 .map(this::get)
                 .collect(Collectors.toList());
     }
 
-    public List<User> findCommonFriends(long id, long otherId) {  //TODO it's work
-//        Set<Long> friendsId = get(id).getFriends();
-//        Set<Long> friendsOtherId = get(otherId).getFriends();
-//        Set<Long> commonFriends = mutualValues(friendsId, friendsOtherId);
-//        List<User> friends = new ArrayList<>();
-//        for (Long friendId : commonFriends) {
-//            friends.add(get(friendId));
-//        }
+    public List<User> findCommonFriends(long id, long otherId) {
         return get(id).getFriends().stream()
                 .filter(get(otherId).getFriends()::contains)
                 .map(Friend::getId)

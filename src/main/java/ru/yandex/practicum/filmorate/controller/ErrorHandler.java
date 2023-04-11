@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RestControllerAdvice
-public class ExceptionController {
+public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -23,14 +23,14 @@ public class UserController {
     }
 
     @GetMapping()
-    public Collection<User> findAll() {  // TODO it's work
+    public Collection<User> findAll() {
         log.info("Входящий запрос GET /users.");
         Collection<User> allUsers = userService.findAll();
         log.info("Исходящий ответ: {}", allUsers);
         return allUsers;
     }
 
-    @GetMapping("/{id}")  // TODO it's work
+    @GetMapping("/{id}")
     public User findUserById(@PathVariable Long id) {
         log.info("Входящий запрос GET /users/{}.", id);
         User userById = userService.get(id);
@@ -38,7 +38,7 @@ public class UserController {
         return userById;
     }
 
-    @GetMapping("/{id}/friends")  // TODO it's work
+    @GetMapping("/{id}/friends")
     public Collection<User> findAllFriends(@PathVariable Long id) {
         log.info("Входящий запрос GET /users/{}/friends.", id);
         Collection<User> allFriends = userService.findAllFriends(id);
@@ -46,7 +46,7 @@ public class UserController {
         return allFriends;
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}") // TODO it's work
+    @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> findCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         log.info("Входящий запрос GET /users/{}/friends/common/{}.", id, otherId);
         Collection<User> commonFriends = userService.findCommonFriends(id, otherId);
@@ -54,7 +54,7 @@ public class UserController {
         return commonFriends;
     }
 
-    @PostMapping  // TODO it's work
+    @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Входящий запрос POST /users: {}", user);
         User createdUser = userService.create(user);
@@ -62,7 +62,7 @@ public class UserController {
         return createdUser;
     }
 
-    @PutMapping  // TODO it's work
+    @PutMapping
     public User update(@Valid @RequestBody User user) throws UserValidationException {
         log.info("Входящий запрос PUT /users: {}", user);
         long key = user.getId();
@@ -71,19 +71,19 @@ public class UserController {
         return updatedUser;
     }
 
-    @PutMapping("{id}/friends/{friendId}") // TODO it's work
+    @PutMapping("{id}/friends/{friendId}")
     public void addToFriends(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Входящий запрос PUT /users/{}/friends/{}", id, friendId);
         userService.addToFriends(id, friendId);
     }
 
-    @DeleteMapping("/{id}") // TODO it's work
+    @DeleteMapping("/{id}")
     public void remove(@PathVariable Long id) {
         log.info("Входящий запрос DELETE /users, c ID: {}", id);
         userService.remove(id);
     }
 
-    @DeleteMapping("{id}/friends/{friendId}") // TODO it's work
+    @DeleteMapping("{id}/friends/{friendId}")
     public void removeFromFriends(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Входящий запрос DELETE /users/{}/friends/{}", id, friendId);
         userService.removeFromFriends(id, friendId);
