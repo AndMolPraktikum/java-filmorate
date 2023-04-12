@@ -3,14 +3,14 @@ package ru.yandex.practicum.filmorate.storage.genre;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,19 +34,20 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Optional<Genre> get(int key) {
-        String sql = "SELECT * FROM genres WHERE id = ?";
+    public Genre get(int key) {
+        String sql = "SELECT * FROM genres WHERE genre_id = ?";
 
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sql, key);
-        if (genreRows.next()) {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeGenre(rs), key));
-        } else {
-            return Optional.empty();
+        List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs), key);
+        if (genres.size() != 1) {
+            log.error("Жанр с таким ID не существует: {}", key);
+            throw new GenreNotFoundException(String.format("Жанр с ID %d не существует", key));
         }
+
+        return genres.get(0);
     }
 
     private Genre makeGenre(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
+        int id = rs.getInt("genre_id");
         String name = rs.getString("name");
 
         return new Genre(id, name);

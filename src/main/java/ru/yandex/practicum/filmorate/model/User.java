@@ -25,23 +25,23 @@ public class User {
     @Past
     private LocalDate birthday;
 
-    private List<Friend> friends;
+    private List<Long> friendIds;
 
-    public User(long id, @NonNull String email, String login, String name, LocalDate birthday, List<Friend> friends) {
+    public User(long id, @NonNull String email, String login, String name, LocalDate birthday, List<Long> friendIds) {
         this.id = id;
         this.email = email;
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-        this.friends = friends;
+        this.friendIds = friendIds;
     }
 
-    public User(@NonNull String email, String login, String name, LocalDate birthday, List<Friend> friends) {
+    public User(@NonNull String email, String login, String name, LocalDate birthday, List<Long> friendIds) {
         this.email = email;
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-        this.friends = friends;
+        this.friendIds = friendIds;
     }
 
     public User(@NonNull String email, String login, String name, LocalDate birthday) {

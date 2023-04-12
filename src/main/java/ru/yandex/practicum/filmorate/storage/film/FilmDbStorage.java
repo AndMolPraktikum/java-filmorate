@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -15,7 +16,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -31,86 +32,49 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        String sql = "SELECT t1.id,\n" +
-                "       name, \n" +
-                "       description,\n" +
-                "       release_year,\n" +
-                "       duration,\n" +
-                "       rate,\n" +
-                "       mpas_id,\n" +
-                "       mpa,\n" +
-                "       likes,\n" +
-                "       genres \n" +
-                "FROM (\n" +
-                "     SELECT f.id AS id,\n" +
-                "            f.name AS name,\n" +
-                "            f.description AS description,\n" +
-                "            f.release_year AS release_year,\n" +
-                "            f.duration AS duration,\n" +
-                "            f.rate AS rate,\n" +
-                "            f.mpas_id AS mpas_id,\n" +
-                "            m.name AS mpa,\n" +
-                "            SUM(l.grade) AS likes\n" +
-                "     FROM films f JOIN mpas m ON f.mpas_id = m.id\n" +
-                "             LEFT JOIN likes l ON f.id = l.film_id\n" +
-                "     GROUP BY id\n" +
-                ") AS t1,\n" +
-                "    (SELECT f.id AS id,\n" +
-                "             array_agg(g.id) AS genres\n" +
-                "     FROM films f LEFT JOIN film_genres fg ON f.id = fg.film_id\n" +
-                "                  LEFT JOIN genres g ON fg.genre_id = g.id\n" +
-                "     GROUP BY id\n" +
-                ") AS t2\n" +
-                "WHERE  t1.id = t2.id;";
+        final String sql = "SELECT f.film_id AS id,\n" +
+                "       f.name AS name,\n" +
+                "       f.description AS description,\n" +
+                "       f.release_year AS release_year,\n" +
+                "       f.duration AS duration,\n" +
+                "       f.rate AS rate,\n" +
+                "       f.mpa_id AS mpa_id,\n" +
+                "       m.name AS mpa,\n" +
+                "       SUM(l.grade) AS likes\n" +
+                "FROM films f JOIN mpas m ON f.mpa_id = m.mpa_id\n" +
+                "             LEFT JOIN likes l ON f.film_id = l.film_id\n" +
+                "GROUP BY id;";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
     }
 
     @Override
-    public Optional<Film> get(long key) {
-        String sql = "SELECT t1.id,\n" +
-                "       name, \n" +
-                "       description,\n" +
-                "       release_year,\n" +
-                "       duration,\n" +
-                "       rate,\n" +
-                "       mpas_id,\n" +
-                "       mpa,\n" +
-                "       likes,\n" +
-                "       genres \n" +
-                "FROM (\n" +
-                "     SELECT f.id AS id,\n" +
-                "            f.name AS name,\n" +
-                "            f.description AS description,\n" +
-                "            f.release_year AS release_year,\n" +
-                "            f.duration AS duration,\n" +
-                "            f.rate AS rate,\n" +
-                "            f.mpas_id AS mpas_id,\n" +
-                "            m.name AS mpa,\n" +
-                "            SUM(l.grade) AS likes\n" +
-                "     FROM films f JOIN mpas m ON f.mpas_id = m.id\n" +
-                "             LEFT JOIN likes l ON f.id = l.film_id\n" +
-                "     GROUP BY id\n" +
-                ") AS t1,\n" +
-                "    (SELECT f.id AS id,\n" +
-                "             array_agg(g.id) AS genres\n" +
-                "     FROM films f LEFT JOIN film_genres fg ON f.id = fg.film_id\n" +
-                "                  LEFT JOIN genres g ON fg.genre_id = g.id\n" +
-                "     GROUP BY id\n" +
-                ") AS t2\n" +
-                "WHERE  t1.id = t2.id AND t1.id = ?;";
+    public Film get(long key) {
+        final String sql = "SELECT f.film_id AS id,\n" +
+                "       f.name AS name,\n" +
+                "       f.description AS description,\n" +
+                "       f.release_year AS release_year,\n" +
+                "       f.duration AS duration,\n" +
+                "       f.rate AS rate,\n" +
+                "       f.mpa_id AS mpa_id,\n" +
+                "       m.name AS mpa,\n" +
+                "       SUM(l.grade) AS likes\n" +
+                "FROM films f JOIN mpas m ON f.mpa_id = m.mpa_id\n" +
+                "             LEFT JOIN likes l ON f.film_id = l.film_id\n" +
+                "WHERE f.film_id = ?\n" +
+                "GROUP BY id;";
 
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, key);
-        if (filmRows.next()) {
-            return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), key));
-        } else {
-            return Optional.empty();
+        final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), key);
+        if (films.size() != 1) {
+            log.error("Фильм с таким ID не существует: {}", key);
+            throw new FilmNotFoundException(String.format("Фильм с ID %d не существует", key));
         }
+        return films.get(0);
     }
 
     @Override
-    public Optional<Film> create(Film film) {
-        String createFilmSql = "INSERT INTO films (name, description, release_year, rate, duration, mpas_id)\n" +
+    public Film create(Film film) {
+        final String createFilmSql = "INSERT INTO films (name, description, release_year, rate, duration, mpa_id)\n" +
                 "VALUES (?, ?, ?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -128,9 +92,9 @@ public class FilmDbStorage implements FilmStorage {
         long createdId = keyHolder.getKey().longValue();
 
         if (film.getGenres() != null) {
-            String createFilmGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
+            final String createFilmGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
             for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(createFilmGenreSql, new Object[]{createdId, genre.getId()});
+                jdbcTemplate.update(createFilmGenreSql, createdId, genre.getId());
             }
         }
 
@@ -138,17 +102,17 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Optional<Film> update(long key, Film film) {
-        String updateFilmSql = "UPDATE  films SET name = ?, description = ?, release_year = ?, duration = ?, \n" +
-                "rate = ?, mpas_id = ? WHERE id = ?; DELETE FROM film_genres WHERE film_id = ?; ";
+    public Film update(long key, Film film) {
+        final String updateFilmSql = "UPDATE  films SET name = ?, description = ?, release_year = ?, duration = ?, \n" +
+                "rate = ?, mpa_id = ? WHERE film_id = ?; DELETE FROM film_genres WHERE film_id = ?; ";
 
-        jdbcTemplate.update(updateFilmSql, new Object[]{film.getName(), film.getDescription(), film.getReleaseDate(),
-                film.getDuration(), film.getRate(), film.getMpa().getId(), key, key});
+        jdbcTemplate.update(updateFilmSql, film.getName(), film.getDescription(), film.getReleaseDate(),
+                film.getDuration(), film.getRate(), film.getMpa().getId(), key, key);
 
         if (film.getGenres() != null) {
-            String createFilmGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
+            final String createFilmGenreSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?);";
             for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(createFilmGenreSql, new Object[]{key, genre.getId()});
+                jdbcTemplate.update(createFilmGenreSql, key, genre.getId());
             }
         }
         return get(key);
@@ -156,7 +120,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void like(long filmId, long userId) {
-        String addLike = "INSERT INTO likes (film_id, user_id, grade) " +
+        final String addLike = "INSERT INTO likes (film_id, user_id, grade) " +
                 "VALUES (?, ?, 1);";
 
         jdbcTemplate.update(addLike, filmId, userId);
@@ -164,9 +128,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public boolean likeCheck(long filmId, long userId) {
-        String likeCheck = "SELECT id FROM likes WHERE film_id = ? AND user_id = ?;";
+        final String likeCheck = "SELECT like_id FROM likes WHERE film_id = ? AND user_id = ?;";
         int count = 0;
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(likeCheck, new Object[]{filmId, userId});
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(likeCheck, filmId, userId);
         while (filmRows.next()) {
             count++;
         }
@@ -175,14 +139,14 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeLike(long filmId, long userId) {
-        String removeLike = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
+        final String removeLike = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
 
         jdbcTemplate.update(removeLike, filmId, userId);
     }
 
     @Override
     public void remove(long key) {
-        String removeFilm = "DELETE FROM films WHERE id = ?";
+        final String removeFilm = "DELETE FROM films WHERE film_id = ?;";
 
         jdbcTemplate.update(removeFilm, key);
     }
@@ -196,20 +160,20 @@ public class FilmDbStorage implements FilmStorage {
         int rate = rs.getInt("rate");
         long likes = rs.getLong("likes");
         Set<Genre> genres = getSetGenres(id);
-        Mpa mpa = new Mpa(rs.getInt("mpas_id"), rs.getString("mpa"));
+        Mpa mpa = new Mpa(rs.getInt("mpa_id"), rs.getString("mpa"));
 
         return new Film(id, name, description, releaseDate, duration, rate, likes, genres, mpa);
     }
 
     private Set<Genre> getSetGenres(long id) {
-        String filmGenres = "SELECT g.id, g.name FROM film_genres fg JOIN genres g " +
-                "ON fg.genre_id = g.id WHERE fg.film_id = ? GROUP BY g.id;";
+        final String filmGenres = "SELECT g.genre_id, g.name FROM film_genres fg JOIN genres g " +
+                "ON fg.genre_id = g.genre_id WHERE fg.film_id = ? GROUP BY g.genre_id;";
 
         return new HashSet<Genre>(jdbcTemplate.query(filmGenres, (rs, rowNum) -> makeGenre(rs), id));
     }
 
     private Genre makeGenre(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
+        int id = rs.getInt("genre_id");
         String name = rs.getString("name");
 
         return new Genre(id, name);

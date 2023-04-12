@@ -3,17 +3,16 @@ package ru.yandex.practicum.filmorate.storage.film;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface FilmStorage {
 
     Collection<Film> findAll();
 
-    Optional<Film> get(long key);
+    Film get(long key);
 
-    Optional<Film> create(Film film);
+    Film create(Film film);
 
-    Optional<Film> update(long key, Film film);
+    Film update(long key, Film film);
 
     void remove(long key);
 

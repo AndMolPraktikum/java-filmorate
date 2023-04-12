@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,14 +33,10 @@ class GenreStorageTest {
 
     @Test
     void get() {
-        Optional<Genre> genreOptional = genreDbStorage.get(2);
+        Genre genre = genreDbStorage.get(2);
 
-        assertThat(genreOptional)
-                .isPresent()
-                .hasValueSatisfying(genre ->
-                        assertThat(genre)
-                                .hasFieldOrPropertyWithValue("id", 2)
-                                .hasFieldOrPropertyWithValue("name", "Драма")
-                );
+        assertThat(genre)
+                .hasFieldOrPropertyWithValue("id", 2)
+                .hasFieldOrPropertyWithValue("name", "Драма");
     }
 }

@@ -3,14 +3,14 @@ package ru.yandex.practicum.filmorate.storage.mpa;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -35,19 +35,19 @@ public class MpaDbStorage implements MpaStorage {
     }
 
     @Override
-    public Optional<Mpa> get(int key) {
-        String sql = "SELECT * FROM mpas WHERE id = ?";
+    public Mpa get(int key) {
+        String sql = "SELECT * FROM mpas WHERE mpa_id = ?";
 
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sql, key);
-        if (mpaRows.next()) {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeMpa(rs), key));
-        } else {
-            return Optional.empty();
+        List<Mpa> mpas = jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs), key);
+        if (mpas.size() != 1) {
+            log.error("MPA с таким ID не существует: {}", key);
+            throw new MpaNotFoundException(String.format("MPA с ID %d не существует", key));
         }
+        return mpas.get(0);
     }
 
     private Mpa makeMpa(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
+        int id = rs.getInt("mpa_id");
         String name = rs.getString("name");
 
         return new Mpa(id, name);

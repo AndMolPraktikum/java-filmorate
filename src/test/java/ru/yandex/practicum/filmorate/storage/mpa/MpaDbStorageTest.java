@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,14 +33,10 @@ class MpaDbStorageTest {
 
     @Test
     void get() {
-        Optional<Mpa> mpaOptional = mpaDbStorage.get(5);
+        Mpa mpa = mpaDbStorage.get(5);
 
-        assertThat(mpaOptional)
-                .isPresent()
-                .hasValueSatisfying(mpa ->
-                        assertThat(mpa)
-                                .hasFieldOrPropertyWithValue("id", 5)
-                                .hasFieldOrPropertyWithValue("name", "NC-17")
-                );
+        assertThat(mpa)
+                .hasFieldOrPropertyWithValue("id", 5)
+                .hasFieldOrPropertyWithValue("name", "NC-17");
     }
 }

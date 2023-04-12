@@ -5,18 +5,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.enums.Status;
-import ru.yandex.practicum.filmorate.model.Friend;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -37,19 +33,20 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> get(long key) {
-        String sql = "SELECT * FROM users WHERE id = ?;";
+    public User get(long key) {
+        String sql = "SELECT * FROM users WHERE user_id = ?;";
 
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, key);
-        if (userRows.next()) {
-            return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeUser(rs), key));
-        } else {
-            return Optional.empty();
+        List<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), key);
+        if (users.size() != 1) {
+            log.error("Пользователь с ID {} не существует", key);
+            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", key));
         }
+
+        return users.get(0);
     }
 
     @Override
-    public Optional<User> create(User user) {
+    public User create(User user) {
         String createFilmSql = "INSERT INTO users (name, login, email, birthday)" +
                 "VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -63,14 +60,14 @@ public class UserDbStorage implements UserStorage {
             return pst;
         }, keyHolder);
 
-        long createdId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+        long createdId = keyHolder.getKey().longValue();
 
         return get(createdId);
     }
 
     @Override
-    public Optional<User> update(long key, User user) {
-        String updateUser = "UPDATE users SET name = ?, login = ?, email = ?, birthday = ? WHERE id = ?";
+    public User update(long key, User user) {
+        String updateUser = "UPDATE users SET name = ?, login = ?, email = ?, birthday = ? WHERE user_id = ?";
 
         jdbcTemplate.update(updateUser, user.getName(), user.getLogin(), user.getEmail(),
                 user.getBirthday(), key);
@@ -80,7 +77,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void remove(long key) {
-        String deleteUser = "DELETE FROM users WHERE id = ?";
+        String deleteUser = "DELETE FROM users WHERE user_id = ?";
         jdbcTemplate.update(deleteUser, key);
     }
 
@@ -92,35 +89,30 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void createFriendship(long id, long friendId) {
-        String updateUser = "INSERT INTO friends (user_id, friend_id, status)" +
-                "VALUES (?, ?, ?);";
+        String updateUser = "INSERT INTO friends (user_id, friend_id)" +
+                "VALUES (?, ?);";
 
-        jdbcTemplate.update(updateUser, id, friendId, "Unconfirmed");
+        jdbcTemplate.update(updateUser, id, friendId);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
-        long id = rs.getLong("id");
+        long id = rs.getLong("user_id");
         String name = rs.getString("name");
         String login = rs.getString("login");
         String email = rs.getString("email");
         LocalDate birthday = rs.getDate("birthday").toLocalDate();
-        List<Friend> friends = getFriends(id);
+        List<Long> friends = getFriends(id);
         User user = new User(id, email, login, name, birthday, friends);
         return user;
     }
 
-    private List<Friend> getFriends(Long id) {
-        String friendsSql = "SELECT friend_id, status \n" +
-                "FROM friends " +
-                "WHERE user_id = ?;";
+    private List<Long> getFriends(Long id) {
+        String friendsSql = "SELECT friend_id FROM friends WHERE user_id = ?;";
 
         return jdbcTemplate.query(friendsSql, (rs, rowNum) -> makeFriend(rs), id);
     }
 
-    private Friend makeFriend(ResultSet rs) throws SQLException {
-        long id = rs.getLong("friend_id");
-        Status status = Status.valueOf(rs.getString("status").toUpperCase());
-
-        return new Friend(id, status);
+    private Long makeFriend(ResultSet rs) throws SQLException {
+        return rs.getLong("friend_id");
     }
 }

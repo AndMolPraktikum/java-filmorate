@@ -3,18 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotLikedException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,12 +32,7 @@ public class FilmService {
     }
 
     public Film get(long key) {
-        Optional<Film> filmOptional = filmDbStorage.get(key);
-        if (filmOptional.isEmpty()) {
-            log.error("Фильм с таким ID не существует: {}", key);
-            throw new FilmNotFoundException(String.format("Фильм с ID %d не существует", key));
-        }
-        return filmOptional.get();
+        return filmDbStorage.get(key);
     }
 
     public Collection<Film> findPopular(int count) { //вывод 10 наиболее популярных фильмов по количеству лайков
@@ -53,36 +44,23 @@ public class FilmService {
 
     public Film create(Film film) {
         isValid(film);
-        return filmDbStorage.create(film).get();
+        return filmDbStorage.create(film);
     }
 
     public Film update(long key, Film film) throws FilmValidationException {
         isValid(film);
-        Optional<Film> filmOptional = filmDbStorage.update(key, film);
-        if (filmOptional.isEmpty()) {
-            log.error("Фильм с таким ID не существует: {}", film.getId());
-            throw new FilmNotFoundException("Фильм с таким ID не существует");
-        }
-        return filmOptional.get();
+        filmDbStorage.get(key);  //если фильма нет, то выбросится ошибка
+        return filmDbStorage.update(key, film);
     }
 
     public void like(long filmId, long userId, String action) {
-        Optional<User> userOptional = userDbStorage.get(userId);
-        if (userOptional.isEmpty()) {
-            log.error("Пользователя с ID {} не существует", userId);
-            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", userId));
-        }
-        Optional<Film> filmOptional = filmDbStorage.get(filmId);
-        if (filmOptional.isEmpty()) {
-            log.error("Фильм с таким ID не существует: {}", filmId);
-            throw new FilmNotFoundException(String.format("Фильм с ID %d не существует", filmId));
-        }
+        userDbStorage.get(userId); //если юзера нет, то выбросится ошибка
+        filmDbStorage.get(filmId); //если фильма нет, то выбросится ошибка
 
         if (action.equals("add")) {
             filmDbStorage.like(filmId, userId);
         }
         if (action.equals("remove")) {
-
             if (!filmDbStorage.likeCheck(filmId, userId)) {
                 log.error("Пользователь с ID {} не отмечал этот фильм", userId);
                 throw new UserNotLikedException(String.format("Пользователь с ID %d не отмечал этот фильм", userId));

@@ -37,14 +37,14 @@ class UserControllerTest {
                 .login("dolore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1946, 8, 20))
-                .friends(new ArrayList<>())
+                .friendIds(new ArrayList<>())
                 .build();
 
         incorrectUser = User.builder()
                 .email("yandex@mail.ru")
                 .login("dolore ullamco")
                 .birthday(LocalDate.of(2446, 8, 20))
-                .friends(new ArrayList<>())
+                .friendIds(new ArrayList<>())
                 .build();
     }
 
