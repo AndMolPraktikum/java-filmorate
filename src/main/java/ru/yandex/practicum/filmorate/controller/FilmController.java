@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,7 @@ public class FilmController {
     public Collection<Film> findAll() {
         log.info("Входящий запрос GET /films.");
         Collection<Film> allFilms = filmService.findAll();
-        log.info("Входящий запрос GET /films. Исходящий ответ: {}", allFilms);
+        log.info("Исходящий ответ: {}", allFilms);
         return allFilms;
     }
 
@@ -40,8 +39,6 @@ public class FilmController {
         return filmById;
     }
 
-    //GET "/popular?count={count}" возвращает список из первых count фильмов по количеству лайков.
-    // Если значение параметра count не задано, верните первые 10.
     @GetMapping("/popular")
     public Collection<Film> findPopular(@RequestParam(defaultValue = "10", required = false) Integer count) {
         log.info("Входящий запрос GET /films/popular?count={}", count);
@@ -58,7 +55,6 @@ public class FilmController {
         return createdFilm;
     }
 
-    //PUT "/{id}/like/{userId}"  пользователь ставит лайк фильму.
     @PutMapping("/{id}/like/{userId}")
     public void like(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Входящий запрос PUT /films/{}/like/{}", id, userId);
@@ -80,7 +76,6 @@ public class FilmController {
         filmService.remove(id);
     }
 
-    //DELETE "/{id}/like/{userId}" пользователь удаляет лайк.
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Входящий запрос DELETE /films/{}/like/{}", id, userId);

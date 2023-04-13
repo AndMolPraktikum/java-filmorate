@@ -3,34 +3,32 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.FriendNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
 
-    private final UserStorage inMemoryUserStorage;
+    private final UserStorage userDbStorage;
 
     @Autowired
-    public UserService(UserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(UserStorage userDbStorage) {
+        this.userDbStorage = userDbStorage;
     }
 
     public Collection<User> findAll() {
-        return inMemoryUserStorage.findAll();
+        return userDbStorage.findAll();
     }
 
     public User get(long id) {
-        if (!inMemoryUserStorage.isContains(id)) {
-            log.error("Пользователь с ID {} не существует", id);
-            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", id));
-        }
-        return inMemoryUserStorage.get(id);
+        return userDbStorage.get(id);
     }
 
     public User create(User user) {
@@ -42,82 +40,48 @@ public class UserService {
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        return inMemoryUserStorage.create(user);
+        return userDbStorage.create(user);
     }
 
     public User update(long key, User user) {
-        if (!inMemoryUserStorage.isContains(key)) {
-            log.error("Пользователя с ID {} не существует", key);
-            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", key));
-        }
+        userDbStorage.get(key);  // если юзера нет в БД, то выбросится исключение
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        if (user.getFriendsId() == null) {
-            user.setFriendsId(new HashSet<>());
-        }
-        return inMemoryUserStorage.update(key, user);
+        //предполагается, что update затрагивает только данные user, список друзей не корректируется
+        return userDbStorage.update(key, user);
     }
 
     public void remove(long key) {
-        inMemoryUserStorage.remove(key);
+        userDbStorage.remove(key);
     }
 
-    //добавление в друзья
-    //***То есть если Лена стала другом Саши, то это значит, что Саша теперь друг Лены***
     public void addToFriends(long id, long friendId) {
-        if (!inMemoryUserStorage.isContains(id)) {
-            log.error("Пользователь с ID {} не существует", id);
-            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", id));
-        }
-        if (!inMemoryUserStorage.isContains(friendId)) {
-            log.error("Пользователь с ID {} не существует", friendId);
-            throw new UserNotFoundException(String.format("Пользователь с ID %d не существует", friendId));
-        }
-        User userId = get(id);
-        userId.getFriendsId().add(friendId);
-        update(id, userId);
-
-        User userFriendId = get(friendId);
-        userFriendId.getFriendsId().add(id);
-        update(friendId, userFriendId);
+        userDbStorage.get(id);  // если юзера нет в БД, то выбросится исключение
+        userDbStorage.get(friendId);  // если друга нет в БД, то выбросится исключение
+        userDbStorage.createFriendship(id, friendId);
     }
 
-    //удаление из друзей
-    public void removeFromFriends(long id, long friendId) {
-        User userId = get(id);
-        userId.getFriendsId().remove(friendId);
-        update(id, userId);
-
-        User userFriendId = get(id);
-        userFriendId.getFriendsId().remove(id);
-        update(id, userFriendId);
+    public void removeFromFriends(long userId, long friendId) {    //удаление из друзей
+        if (!get(userId).getFriendIds().contains(friendId)) {
+            log.error("Пользователь с ID: {} не имеет в друзьях пользователя с ID: {} ", userId, friendId);
+            throw new FriendNotFoundException(String.format("Пользователь с ID: %d не имеет " +
+                    "в друзьях пользователя с ID: %d ", userId, friendId));
+        }
+        userDbStorage.removeFromFriends(userId, friendId);
     }
 
-    //вывод списка общих друзей
     public List<User> findAllFriends(long id) {
-        Set<Long> friendsId = get(id).getFriendsId();
-        List<User> friends = new ArrayList<>();
-        for (Long friendId : friendsId) {
-            friends.add(get(friendId));
-        }
-        return friends;
+        return get(id).getFriendIds().stream()
+                .map(this::get)
+                .collect(Collectors.toList());
     }
 
-    public List<User> findCommonFriends(long id, long otherId) {
-        Set<Long> friendsId = get(id).getFriendsId();
-        Set<Long> friendsOtherId = get(otherId).getFriendsId();
-        Set<Long> commonFriends = mutualValues(friendsId, friendsOtherId);
-        List<User> friends = new ArrayList<>();
-        for (Long friendId : commonFriends) {
-            friends.add(get(friendId));
-        }
-        return friends;
+    public List<User> findCommonFriends(long id, long otherId) { //вывод списка общих друзей
+        return get(id).getFriendIds().stream()
+                .filter(get(otherId).getFriendIds()::contains)
+                .map(this::get)
+                .collect(Collectors.toList());
     }
 
-    private Set<Long> mutualValues(Set<Long> set1, Set<Long> set2) {
-        Set<Long> newSet = new HashSet<>(set1);
-        newSet.retainAll(set2);
-        return newSet;
-    }
 }

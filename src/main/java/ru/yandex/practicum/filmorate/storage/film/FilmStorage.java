@@ -16,5 +16,10 @@ public interface FilmStorage {
 
     void remove(long key);
 
-    boolean isContains(long key);
+    void like(long filmId, long userId);
+
+    boolean likeCheck(long filmId, long userId);
+
+    void removeLike(long filmId, long userId);
+
 }

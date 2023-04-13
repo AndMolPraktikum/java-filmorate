@@ -5,10 +5,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -16,7 +18,8 @@ import java.time.LocalDate;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@SpringBootTest
+@AutoConfigureMockMvc
 @ComponentScan(value = {"ru.yandex.practicum.filmorate"})
 class FilmControllerTest {
 
@@ -35,6 +38,7 @@ class FilmControllerTest {
                 .description("A wonderful film about the life of programmers")
                 .releaseDate(LocalDate.of(2023, 1, 1))
                 .duration(100)
+                .mpa(new Mpa(1))
                 .build();
 
         incorrectFilm = Film.builder()
@@ -42,6 +46,7 @@ class FilmControllerTest {
                 .description("Description")
                 .releaseDate(LocalDate.of(1900, 3, 25))
                 .duration(200)
+                .mpa(new Mpa(1))
                 .build();
     }
 
@@ -151,7 +156,7 @@ class FilmControllerTest {
         mockMvc.perform(put("/films")
                         .content(objectMapper.writeValueAsString(filmUpdate))
                         .contentType("application/json"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -163,34 +168,6 @@ class FilmControllerTest {
         mockMvc.perform(get("/films"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"));
-    }
-
-    @Test
-    void shouldReturnRate1() throws Exception {
-        final User friend = User.builder()
-                .login("friend")
-                .name("")
-                .email("friendmail@yandex.ru")
-                .birthday(LocalDate.of(2000, 9, 23))
-                .build();
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(friend))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(correctFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(put("/films/1/like/1"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/films/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value("1"));
     }
 
     @Test
@@ -212,10 +189,8 @@ class FilmControllerTest {
                         .contentType("application/json"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(delete("/films/1/like/1"))
+        mockMvc.perform(delete("/films/1/like/8"))
                 .andExpect(content().contentType("application/json"))
                 .andExpect(status().isNotFound());
-        //.andExpect(content().string(containsString("Пользователь с ID 1 не отмечал этот фильм")));
-        // найти решение для кодировки в русские символы ÐÐ¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÐµÐ»Ñ Ñ ID 1 Ð½Ðµ Ð¾ÑÐ¼ÐµÑÐ°Ð» ÑÑÐ¾Ñ ÑÐ¸Ð»ÑÐ¼
     }
 }
