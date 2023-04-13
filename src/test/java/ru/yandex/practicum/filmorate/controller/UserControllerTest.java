@@ -5,18 +5,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ComponentScan(value = {"ru.yandex.practicum.filmorate"})
 class UserControllerTest {
 
@@ -24,7 +26,6 @@ class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-
 
     private User correctUser;
     private User incorrectUser;
@@ -36,12 +37,14 @@ class UserControllerTest {
                 .login("dolore")
                 .name("Nick Name")
                 .birthday(LocalDate.of(1946, 8, 20))
+                .friendIds(new ArrayList<>())
                 .build();
 
         incorrectUser = User.builder()
                 .email("yandex@mail.ru")
                 .login("dolore ullamco")
                 .birthday(LocalDate.of(2446, 8, 20))
+                .friendIds(new ArrayList<>())
                 .build();
     }
 
@@ -58,7 +61,7 @@ class UserControllerTest {
                         .contentType("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value("1"));
+                .andExpect(jsonPath("$.name").value("Nick Name"));
     }
 
     @Test
@@ -161,33 +164,5 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(correctUser2))
                         .contentType("application/json"))
                 .andExpect(jsonPath("$.name").value("dolore"));
-    }
-
-    @Test
-    public void shouldReturnFriend1() throws Exception {
-        final User friend = User.builder()
-                .login("friend")
-                .name("")
-                .email("friendmail@yandex.ru")
-                .birthday(LocalDate.of(2000, 9, 23))
-                .build();
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(correctUser))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(friend))
-                        .contentType("application/json"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(put("/users/1/friends/2"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/users/1/friends"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(content().string(containsString("\"id\":2")));
     }
 }

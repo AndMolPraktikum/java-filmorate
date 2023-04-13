@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,8 +24,47 @@ public class Film {
     @Min(1)
     private long duration;
     private int rate;
-    @JsonIgnore
-    private Set<Long> userIds;
-    //private Set<String> genres; //У фильма может быть сразу несколько жанров
-    //private String rating; //Определяет возрастное ограничение для фильма
+    private long likes;
+    private Set<Genre> genres;
+    @NotNull
+    private Mpa mpa;  //возрастное ограничение
+
+    public Film(long id, String name, String description, LocalDate releaseDate, long duration, long likes,
+                Set<Genre> genres, Mpa mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.likes = likes;
+        this.genres = genres;
+        this.mpa = mpa;
+    }
+
+    public Film(long id, String name, String description, LocalDate releaseDate, long duration, int rate, long likes,
+                Set<Genre> genres, Mpa mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.rate = rate;
+        this.likes = likes;
+        this.genres = genres;
+        this.mpa = mpa;
+    }
+
+    public Film(String name, String description, LocalDate releaseDate, long duration, int rate,
+                Set<Genre> genres, Mpa mpa) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.rate = rate;
+        this.genres = genres;
+        this.mpa = mpa;
+    }
+
+    public Film() {
+    }
 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RestControllerAdvice
-public class ExceptionController {
+public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -66,6 +66,27 @@ public class ExceptionController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Response handleUserNotLikedException(final UserNotLikedException e) {
+        log.info("404 {}", e.getMessage(), e);
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Response handleMpaNotFoundException(final MpaNotFoundException e) {
+        log.info("404 {}", e.getMessage(), e);
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Response handleGenreNotFoundException(final GenreNotFoundException e) {
+        log.info("404 {}", e.getMessage(), e);
+        return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Response handleFriendNotFoundException(final FriendNotFoundException e) {
         log.info("404 {}", e.getMessage(), e);
         return new Response(String.format("%s %s", LocalDateTime.now(), e.getMessage()));
     }
