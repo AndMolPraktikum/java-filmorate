@@ -2,5 +2,5 @@
 Template repository for Filmorate project.
 
 
-![DataBase Image](https://github.com/AndMolPraktikum/java-filmorate/blob/add-database/PUBLIC.png)
+![DataBase Image](https://github.com/AndMolPraktikum/java-filmorate/blob/main/src/main/resources/PUBLIC.png)
 
